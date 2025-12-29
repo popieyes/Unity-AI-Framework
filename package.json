@@ -1,0 +1,12 @@
+{
+    "name": "com.popieyes.aiframework",
+    "version": "1.0.0",
+    "displayName": "Modular AI Framework",
+    "description": "Provides reusable modules for managing simple or complex AIs in Unity",
+    "unity": "6000.2.1f1",
+    "author": {
+        "name": "Santiago Meneses Gómez",
+        "email": "dragonier2013@gmail.com"
+    }
+
+}
