@@ -1,25 +1,39 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using Popieyes.AI.Transitions;
+using UnityEditor;
 
 namespace Popieyes.AI
 {
-    public class StateMachine : MonoBehaviour
+    public abstract class StateMachine<T> : MonoBehaviour
     {
-        private Dictionary<System.Type, IState> _stateCache = new Dictionary<System.Type, IState>();
-        private IState _currentState;
-        public IState CurrentState => _currentState;
+        [Header("Configuration")]
+        public bool debug = false;
+        private Dictionary<Type, State<T>> _stateCache = new Dictionary<Type, State<T>>();
+        private State<T> _currentState;
+        public State<T> CurrentState => _currentState;
+        private List<Transition> _transitions = new List<Transition>(); 
+        
        
         #region UNITY CALLBACKS
         void Awake()
         {
-            var states = GetComponents<IState>();
-            foreach (var state in states)
+            T context = GetComponent<T>();
+            StateBase[] objs = GetComponents<StateBase>();
+            foreach (var obj in objs)
             {
-                _stateCache.Add(state.GetType(), state);
-                state.OnAwake();
+                if(obj is State<T> state)
+                {
+                    _stateCache.Add(state.GetType(), state);
+                    state.SetContext(context);
+                    state.SetupTransitions();
+                    state.OnAwake();
+                }
             }
-            _currentState = _stateCache.First().Value;
+            if(_stateCache.Count > 0)
+                _currentState = _stateCache.First().Value;
         }
         void Start()
         {
@@ -28,6 +42,8 @@ namespace Popieyes.AI
         void Update()
         {
             _currentState?.OnStep();
+            CheckTransitions();
+            CheckAnyStateTransitions();
         }
 
         void FixedUpdate()
@@ -60,18 +76,68 @@ namespace Popieyes.AI
         {
             _currentState?.CollisionStay(collision);
         }
-
+       
         #endregion
 
         #region STATE MACHINE
-        public void SwitchState<T>() where T : IState
+        /// <summary>
+        /// Switches to the specified state type.
+        /// </summary>
+        /// <typeparam name="T">The type of the state to switch to.</typeparam>
+        private void SwitchState<U>() where U : State<T>
         {
-            if (_stateCache.TryGetValue(typeof(T), out IState newState))
+            SwitchState(typeof(U));
+        }
+        /// <summary>
+        /// Switches to the specified state type.
+        /// </summary>
+        /// <param name="type">The type of the state to switch to.</param>
+        private void SwitchState(Type type)
+        {
+            if(_currentState != null && _currentState.GetType() == type)
+                return;
+            if (_stateCache.TryGetValue(type, out State<T> newState))
             {
                 _currentState?.OnExit();
                 _currentState = newState;
                 _currentState.OnEnter();
             }
+        }
+        /// <summary>
+        /// Checks and executes transitions for the current state.
+        /// </summary>
+        private void CheckTransitions()
+        {
+            foreach(var transition in _currentState.Transitions)
+            {
+                if(transition.Condition())
+                {
+                    SwitchState(transition.TargetState);
+                    break;
+                }
+            }
+        }
+        /// <summary>
+        /// Checks and executes any-state transitions.
+        /// </summary>
+        private void CheckAnyStateTransitions()
+        {
+            foreach(var transition in _transitions)
+            {
+                if(transition.Condition())
+                {
+                    SwitchState(transition.TargetState);
+                    break;
+                }
+            }
+        }
+        /// <summary>
+        /// Adds a transition that can be triggered from any state.
+        /// </summary>
+        /// <param name="transition">The transition to add.</param>
+        public void AddAnyStateTransition(Transition transition)
+        {
+            _transitions.Add(transition);
         }
         #endregion
     }

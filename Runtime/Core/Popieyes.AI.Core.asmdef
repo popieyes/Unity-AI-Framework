@@ -1,9 +1,7 @@
 {
-    "name": "Framework.Editor",
-    "rootNamespace": "Popieyes.AI.Editor",
-    "references": [
-        "GUID:a8946433ee4c6e74596ff55b1749e7e0"
-    ],
+    "name": "Popieyes.AI.Core",
+    "rootNamespace": "Popieyes.AI.Core",
+    "references": [],
     "includePlatforms": [],
     "excludePlatforms": [],
     "allowUnsafeCode": false,

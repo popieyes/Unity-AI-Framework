@@ -1,13 +1,19 @@
-using UnityEditor;
+/* using UnityEditor;
 using UnityEngine;
 
 namespace Popieyes.AI.Editor
 {
-    [CustomEditor(typeof(StateMachine))]
+    [CustomEditor(typeof(StateMachine<T>))]
     public class StateMachineEditor : UnityEditor.Editor
     {
         private bool _showStates = true;
 
+        void OnSceneGUI()
+        {
+            StateMachine sm = (target as StateMachine);
+            if (!sm.debug || sm.CurrentState == null) return;
+            Handles.Label(sm.transform.position + Vector3.up * 2, $"Current State: {sm.CurrentState.GetType().Name}");
+        }
         public override void OnInspectorGUI()
         {
             // Draw the default stuff (like your initial state field)
@@ -45,9 +51,10 @@ namespace Popieyes.AI.Editor
            /*  UnityEditor.Editor editor = CreateEditor(state);
             editor.OnInspectorGUI(); */
 
-            EditorGUILayout.EndVertical();
+          /*   EditorGUILayout.EndVertical();
             EditorGUILayout.Space(2);
         }
     
     }
-}
+} */
+ 

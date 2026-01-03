@@ -1,5 +1,5 @@
 {
-    "name": "com.popieyes.aiframework",
+    "name": "com.popieyes.ai",
     "version": "1.0.0",
     "displayName": "AI Framework",
     "description": "Provides reusable modules for managing simple or complex AIs in Unity",
